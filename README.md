@@ -62,8 +62,7 @@ Just to summarize, given n data points, the Chinese Restaurant Process specifies
 
 Since code makes everything better, here's some Ruby to simulate a CRP:
 
-```
- chinese_restaurant_process.rb
+``` ruby
 # Generate table assignments for `num_customers` customers, according to
 # a Chinese Restaurant Process with dispersion parameter `alpha`.
 #
@@ -129,7 +128,7 @@ To be precise, the difference between the CRP and the Polya Urn Model is that th
 
 Again, here's some code for simulating a Polya Urn Model:
 
-```
+``` ruby
 # Draw `num_balls` colored balls according to a Polya Urn Model
 # with a specified base color distribution and dispersion parameter
 # `alpha`.
@@ -170,7 +169,7 @@ And here's some sample output, using a uniform distribution over the unit interv
 
 Here's the same code for a Polya Urn Model, but in R:
 
-```
+``` r
 # Return a vector of `num_balls` ball colors according to a Polya Urn Model
 # with dispersion `alpha`, sampling from a specified base color distribution.
 polya_urn_model = function(base_color_distribution, num_balls, alpha) {
@@ -231,7 +230,7 @@ Thus, the Stick-Breaking process is simply the CRP or Polya Urn Model from a dif
 
 Here's some R code for simulating a Stick-Breaking process:
 
-```
+``` r
 # Return a vector of weights drawn from a stick-breaking process
 # with dispersion `alpha`.
 #
@@ -338,7 +337,7 @@ As expected, the Dirichlet Process model discovers more and more clusters as mor
 
 How many clusters does the mixture model infer from the entire dataset? Running the Gibbs sampler several times, we find that the number of clusters tends around 11:
 
-[![Number of clusters](http://dl.dropbox.com/u/10506/blog/dirichlet-process/num_mcdonalds_clusters.png)](http://dl.dropbox.com/u/10506/blog/dirichlet-process/num_mcdonalds_clusters.png)
+[![Number of clusters](http://dl.dropbox.com/u/10506/blog/dirichlet-process/num_mcdonalds_clusters_small.png)](http://dl.dropbox.com/u/10506/blog/dirichlet-process/num_mcdonalds_clusters.png)
 
 Let's also dive into one of the clusterings.
 
@@ -360,7 +359,7 @@ Looking at a sample of foods from the first cluster discovered in one of the run
 
 We can also [z-scale](http://en.wikipedia.org/wiki/Standard_score) each nutrition dimension to have zero mean and standard deviation 1, and look at the nutritional profile of some foods from this cluster:
 
-[![Cluster 1](http://dl.dropbox.com/u/10506/blog/dirichlet-process/cluster1.png)]
+[![Cluster 1](http://dl.dropbox.com/u/10506/blog/dirichlet-process/cluster1.png)](http://dl.dropbox.com/u/10506/blog/dirichlet-process/cluster1.png)
 
 We can see that these foods tend to be high in trans fat and low in vitamins, protein, fiber, and sodium.
 
@@ -374,7 +373,7 @@ Here's a sample from the second cluster, which contains a lot of sauces:
 
 And looking at the nutritional profile of points in this cluster, we see that it's heavy in sodium and fat:
 
-[![Cluster 2](http://dl.dropbox.com/u/10506/blog/dirichlet-process/cluster2.png)]
+[![Cluster 2](http://dl.dropbox.com/u/10506/blog/dirichlet-process/cluster2.png)](http://dl.dropbox.com/u/10506/blog/dirichlet-process/cluster2.png)
 
 **Cluster 3 (Burgers, Crispy Foods, High-Cholesterol)**
 
@@ -391,7 +390,7 @@ The third cluster is high in fat and sodium, and low in carbs and sugar:
 * Sausage McMuffin
 * Sausage McGriddles
 
-[![Cluster 3](http://dl.dropbox.com/u/10506/blog/dirichlet-process/cluster3.png)]
+[![Cluster 3](http://dl.dropbox.com/u/10506/blog/dirichlet-process/cluster3.png)](http://dl.dropbox.com/u/10506/blog/dirichlet-process/cluster3.png)
 
 **Cluster 4 (Creamy Sauces)**
 
@@ -404,7 +403,7 @@ Interestingly, even though we already found a cluster of sauces above, we discov
 
 Nutritionally, it looks like the difference is that these sauces are higher in calories from fat, and much lower in sodium:
 
-[![Cluster 4](http://dl.dropbox.com/u/10506/blog/dirichlet-process/cluster4.png)]
+[![Cluster 4](http://dl.dropbox.com/u/10506/blog/dirichlet-process/cluster4.png)](http://dl.dropbox.com/u/10506/blog/dirichlet-process/cluster4.png)
 
 **Cluster 5 (Salads)**
 
@@ -418,7 +417,7 @@ Here's a salad cluster. A lot of salads also appeared in the third cluster (alon
 
 This is reflected in the higher content of iron, vitamin A, and fiber:
 
-[![Cluster 5](http://dl.dropbox.com/u/10506/blog/dirichlet-process/cluster5.png)]
+[![Cluster 5](http://dl.dropbox.com/u/10506/blog/dirichlet-process/cluster5.png)](http://dl.dropbox.com/u/10506/blog/dirichlet-process/cluster5.png)
 
 **Cluster 6 (More Sauces)**
 
@@ -430,7 +429,7 @@ Again, we find another cluster of sauces:
 
 These are still high in sodium, but much lower in fat:
 
-[![Cluster 6](http://dl.dropbox.com/u/10506/blog/dirichlet-process/cluster6.png)]
+[![Cluster 6](http://dl.dropbox.com/u/10506/blog/dirichlet-process/cluster6.png)](http://dl.dropbox.com/u/10506/blog/dirichlet-process/cluster6.png)
 
 **Cluster 7 (Fruit and Maple Oatmeal)**
 
@@ -438,7 +437,7 @@ Amusingly, fruit and maple oatmeal is in a cluster by itself:
 
 * Fruit & Maple Oatmeal
 
-[![Cluster 7](http://dl.dropbox.com/u/10506/blog/dirichlet-process/cluster7.png)]
+[![Cluster 7](http://dl.dropbox.com/u/10506/blog/dirichlet-process/cluster7.png)](http://dl.dropbox.com/u/10506/blog/dirichlet-process/cluster7.png)
 
 **Cluster 8 (Sugary Drinks)**
 
@@ -457,7 +456,7 @@ We also get a cluster of sugary drinks:
 
 In addition to high sugar content, this cluster is also high in carbohydrates and calcium, and low in fat.
 
-[![Cluster 8](http://dl.dropbox.com/u/10506/blog/dirichlet-process/cluster8.png)]
+[![Cluster 8](http://dl.dropbox.com/u/10506/blog/dirichlet-process/cluster8.png)](http://dl.dropbox.com/u/10506/blog/dirichlet-process/cluster8.png)
 
 **Cluster 9 (Breakfast Foods)**
 
@@ -470,7 +469,7 @@ Here's a cluster of high-cholesterol breakfast foods:
 * McSkillet Burrito with Sausage
 * Big Breakfast with Hotcakes
 
-[![Cluster 9](http://dl.dropbox.com/u/10506/blog/dirichlet-process/cluster9.png)]
+[![Cluster 9](http://dl.dropbox.com/u/10506/blog/dirichlet-process/cluster9.png)](http://dl.dropbox.com/u/10506/blog/dirichlet-process/cluster9.png)
 
 **Cluster 10 (Apples)**
 
@@ -481,7 +480,7 @@ Here's a cluster of apples:
 
 Vitamin C, check:
 
-[![Cluster 10](http://dl.dropbox.com/u/10506/blog/dirichlet-process/cluster10.png)]
+[![Cluster 10](http://dl.dropbox.com/u/10506/blog/dirichlet-process/cluster10.png)](http://dl.dropbox.com/u/10506/blog/dirichlet-process/cluster10.png)
 
 **Cluster 11 (Coffee Drinks)**
 
@@ -494,4 +493,4 @@ And finally, we find a group of coffee drinks:
 
 These are much higher in calcium and protein, and much lower in sugar, than the other drink cluster from above:
 
-[![Cluster 11](http://dl.dropbox.com/u/10506/blog/dirichlet-process/cluster11.png)]
+[![Cluster 11](http://dl.dropbox.com/u/10506/blog/dirichlet-process/cluster11.png)](http://dl.dropbox.com/u/10506/blog/dirichlet-process/cluster11.png)
