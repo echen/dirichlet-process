@@ -1,6 +1,6 @@
-# Introduction: Infinite Mixture Models
+# Introduction to Nonparametric Bayes and the Dirichlet Process
 
-Imagine you're a budding chef. A data-curious one, of course, so you start by taking a set of foods (pizza, salad, spaghetti, etc.) and ask 10 friends to tell you how much of each they ate in the past day.
+Imagine you're a budding chef. A data-curious one, of course, so you start by taking a set of foods (pizza, salad, spaghetti, etc.) and you ask 10 friends to tell you how much of each they ate in the past day.
 
 Your goal: to find natural *groups* of foodies, so that you can better cater to each cluster's tastes. For example, your fratboy friends might love [wings and beer](https://twitter.com/#!/edchedch/status/166343879547822080), your anime friends might love soba and sushi, your hipster friends probably dig tofu, and so on.
 
@@ -8,9 +8,9 @@ So how can you use the data you've gathered to discover different kinds of group
 
 [![Clustering Example](http://dl.dropbox.com/u/10506/blog/dirichlet-process/clustering-example.png)](http://dl.dropbox.com/u/10506/blog/dirichlet-process/clustering-example.png)
 
-One method is to use a standard clustering algorithm like **k-means** or **Gaussian mixture modeling** (see [this previous post](http://blog.echen.me/2011/03/19/counting-clusters/) for a brief introduction). The problem is that these both assume a *fixed* number of clusters, which they need to be told to find. There are a couple methods for selecting the number of clusters to learn (see [the same post](http://blog.echen.me/2011/03/19/counting-clusters/) for an introduction to the gap and prediction strength statistics), but the problem is a more fundamental one: most real-world data simply doesn't have a fixed number of clusters.
+One way is to use a standard clustering algorithm like **k-means** or **Gaussian mixture modeling** (see [this previous post](http://blog.echen.me/2011/03/19/counting-clusters/) for a brief introduction). The problem is that these both assume a *fixed* number of clusters, which they need to be told to find. There are a couple methods for selecting the number of clusters to learn (e.g., the [gap and prediction strength statistics](http://blog.echen.me/2011/03/19/counting-clusters/)), but the problem is a more fundamental one: most real-world data simply doesn't have a fixed number of clusters.
 
-That is, suppose we've asked 10 of our friends what they ate in the past day, and we want to find groups of eating preferences. There's really an infinite number of foodie types (carnivore, vegan, snacker, Italian, healthy, fast food, heavy eaters, light eaters, and so on), but with only 10 friends, we simply don't have enough data to detect them all. (Indeed, we're limited to 10 clusters!) So whereas k-means starts with the incorrect assumption that there's a fixed, finite number of clusters that our points come from, *no matter if we feed it more data*, what we'd really like is a method positing an infinite number of hidden clusters that naturally arise as we ask more friends about their food habits. (For example, with only 2 data points, we might not be able to tell the difference between vegans and vegetarians, but with 200 data points, we probably would.)
+That is, suppose we've asked 10 of our friends what they ate in the past day, and we want to find groups of eating preferences. There's really an infinite number of foodie types (carnivore, vegan, snacker, Italian, healthy, fast food, heavy eaters, light eaters, and so on), but with only 10 friends, we simply don't have enough data to detect them all. (Indeed, we're limited to 10 clusters!) So whereas k-means starts with the incorrect assumption that there's a fixed, finite number of clusters that our points come from, *no matter if we feed it more data*, what we'd really like is a method positing an infinite number of hidden clusters that naturally arise as we ask more friends about their food habits. (For example, with only 2 data points, we might not be able to tell the difference between vegans and vegetarians, but with 200 data points, we probably could.)
 
 Luckily for us, this is precisely the purview of **nonparametric Bayes**.*
 
@@ -18,23 +18,23 @@ Luckily for us, this is precisely the purview of **nonparametric Bayes**.*
 
 # A Generative Story
 
-Let's describe a generative model for finding clusters in any set of data. We assume an infinite set of latent groups, where each group has a set of parameters. For example, each group could be a Gaussian with some specified mean $\mu_i$ and standard deviation $\sigma_i$, and these group parameters themselves are assumed to come from some base distribution $G_0$. Data is then generated in the following manner:
+Let's describe a generative model for finding clusters in any set of data. We assume an infinite set of latent groups, where each group is described by some set of parameters. For example, each group could be a Gaussian with a specified mean $\mu_i$ and standard deviation $\sigma_i$, and these group parameters themselves are assumed to come from some base distribution $G_0$. Data is then generated in the following manner:
 
-* Select a group.
+* Select a cluster.
 * Sample from that cluster to generate a new point.
 
-(Note the resemblance to a [finite mixture model](http://en.wikipedia.org/wiki/Mixture_model). Also, groups can be any distributions at all, not necessarily Gaussians.)
+(Note the resemblance to a [finite mixture model](http://en.wikipedia.org/wiki/Mixture_model).)
 
 For example, suppose we ask 10 friends how many calories of pizza, salad, and rice they ate yesterday. Our groups could be:
 
-* A Gaussian centered at (pizza = 5000, salad = 100, rice = 500) (i.e., a pizza lovers group).*
+* A Gaussian centered at (pizza = 5000, salad = 100, rice = 500) (i.e., a pizza lovers group).
 * A Gaussian centered at (pizza = 100, salad = 3000, rice = 1000) (maybe a vegan group).
 * A Gaussian centered at (pizza = 100, salad = 100, rice = 10000) (definitely Asian).
 * ...
 
 When deciding what to eat when she woke up yesterday, Alice could have thought *girl, I'm in the mood for pizza* and her food consumption yesterday would have been a sample from the pizza Gaussian. Similarly, Bob could have spent the day in Chinatown, thereby sampling from the Asian Gaussian for his day's meals. And so on.
 
-The burning question, then, is: how do we assign each friend to a group?
+The big question, then, is: how do we assign each friend to a group?
 
 # Assigning Groups
 
@@ -43,10 +43,10 @@ The burning question, then, is: how do we assign each friend to a group?
 One way to assign friends to groups is to use a **Chinese Restaurant Process**. This works as follows: Imagine a restaurant where all your friends went to eat yesterday...
 
 * Initially the restaurant is empty.
-* The first person to enter (Alice) sits down at a table (i.e., selects a group). She then orders food for the table (i.e., she selects parameters for the group); everyone else who joins the table will then be limited to eating from the food she ordered.
+* The first person to enter (Alice) sits down at a table (selects a group). She then orders food for the table (i.e., she selects parameters for the group); everyone else who joins the table will then be limited to eating from the food she ordered.
 * The second person to enter (Bob) sits down at a table. Which table does he sit at? With probability $\alpha / (1 + \alpha)$ he sits down at a new table (i.e., selects a new group) and orders food for the table; with probability $1 / (1 + \alpha)$ he sits with Alice and eats from the food she's already ordered (i.e., he's in the same group as Alice).
 * ...
-* The (n+1)-st person sits down at a new table with probability $\alpha / (n + \alpha)$, and at table k with probability $n_k / (n + \alpha)$, where $n_k is the number of people currently sitting at table k.
+* The (n+1)-st person sits down at a new table with probability $\alpha / (n + \alpha)$, and at table k with probability $n_k / (n + \alpha)$, where $n_k$ is the number of people currently sitting at table k.
 
 Note a couple things:
 
@@ -117,10 +117,10 @@ Notice that as we increase $\alpha$, so too does the number of distinct tables i
 
 Another method for assigning friends to groups is to follow the **Polya Urn Model**. This is basically the same model as the Chinese Restaurant Process, just with a different metaphor.
 
-* We start with an urn containing $\alpha * G_0(x)$ balls of "color" $x$, for each possible value of $x$. ($G_0$ is our base distribution, and $G_0(x)$ is the probability of sampling $x$ from $G_0$). Note that these are possibly fractional balls.
+* We start with an urn containing $\alpha G_0(x)$ balls of "color" $x$, for each possible value of $x$. ($G_0$ is our base distribution, and $G_0(x)$ is the probability of sampling $x$ from $G_0$). Note that these are possibly fractional balls.
 * At each time step, draw a ball from the urn, note its color, and then drop both the original ball plus a new ball of the same color back into the urn.
 
-Note the connection between this process and the CRP: balls correspond to people (i.e., data points), colors correspond to table assignments (i.e., clusters), $alpha$ is again a dispersion parameter (put differently, a prior), colors satisfy a rich-get-richer property (since colors with many balls are more likely to get drawn), and so on. (Again, there's also a connection between this urn model and [the urn model for the (finite) Dirichlet distribution](http://en.wikipedia.org/wiki/Dirichlet_distribution#P.C3.B3lya.27s_urn)...)
+Note the connection between this process and the CRP: balls correspond to people (i.e., data points), colors correspond to table assignments (i.e., clusters), alpha is again a dispersion parameter (put differently, a prior), colors satisfy a rich-get-richer property (since colors with many balls are more likely to get drawn), and so on. (Again, there's also a connection between this urn model and [the urn model for the (finite) Dirichlet distribution](http://en.wikipedia.org/wiki/Dirichlet_distribution#P.C3.B3lya.27s_urn)...)
 
 To be precise, the difference between the CRP and the Polya Urn Model is that the CRP specifies only a distribution over *partitions* (i.e., table assignments), but doesn't assign parameters to each group, whereas the Polya Urn Model does both.
 
@@ -202,26 +202,19 @@ And some sample density plots of the colors in the urn, when using a unit normal
 
 [![Polya Urn Model, Alpha = 50](http://dl.dropbox.com/u/10506/blog/dirichlet-process/polya_alpha_50.png)](http://dl.dropbox.com/u/10506/blog/dirichlet-process/polya_alpha_50.png)
 
-Notice that as alpha increases (i.e., we sample more new ball colors from our base; i.e., as we place more weight on our prior), the colors in the urn approach a unit normal (our base color distribution).
-
-(...And in case you're getting a little lost as the length of this post increases: these color distributions of balls in the Polya urn can also be thought of as:
-
-* The food ordered at each table in a Chinese Restaurant Process (food ordered = group parameter = color, people at the table = points in the group = balls with the same color)
-* The parameters of a cluster (cluster parameters = color, number of points in cluster = number of balls with color)
-
-We're still just assigning points to groups (people to foodie types; balls to colors) here.)
+Notice that as alpha increases (i.e., we sample more new ball colors from our base; i.e., as we place more weight on our prior), the colors in the urn tend to a unit normal (our base color distribution).
 
 ## Stick-Breaking Process
 
-Imagine running either the Chinese Restaurant Process or the Polya Urn Model for an infinite set of points. For each group $i$, this gives us a proportion $w_i$ of points that fall into group $i$.
+Imagine running either the Chinese Restaurant Process or the Polya Urn Model without stop. For each group $i$, this gives a proportion $w_i$ of points that fall into group $i$.
 
 So instead of running the CRP or Polya Urn model to figure out these proportions, can we simply generate them directly?
 
 This is exactly what the Stick-Breaking Process does:
 
 * Start with a stick of length one.
-* Generate a random variable $\beta_1 \sim Beta(1, \alpha)$. By the definition of the [Beta distribution](http://en.wikipedia.org/wiki/Beta_distribution) this will be a real number between 0 and 1, and centered at $1 / (1 + \alpha)$. Break off the stick at $\beta_1$. $w_1$ is then the length of the stick on the left.
-* Now take the stick to the right, and generate $\beta_2 \ sim Beta(1, \alpha)$ again. Break off the stick $\beta_2$ into the stick. Again, $w_2$ is the length of the stick to the left (i.e., $w_2 = (1 - \beta_1_)\beta_2_$).
+* Generate a random variable $\beta_1 \sim Beta(1, \alpha)$. By the definition of the [Beta distribution](http://en.wikipedia.org/wiki/Beta_distribution), this will be a real number between 0 and 1, with expected value $1 / (1 + \alpha)$. Break off the stick at $\beta_1$; $w_1$ is then the length of the stick on the left.
+* Now take the stick to the right, and generate $\beta_2 \sim Beta(1, \alpha)$. Break off the stick $\beta_2$ into the stick. Again, $w_2$ is the length of the stick to the left, i.e., $w_2 = (1 - \beta_1) \beta_2$.
 * And so on.
 
 Thus, the Stick-Breaking process is simply the CRP or Polya Urn Model from a different point of view. For example, assigning customers to table 1 according to the Chinese Restaurant Process is equivalent to assigning customers to table 1 with probability $w_1$.
@@ -270,7 +263,7 @@ For example, let's look again at the plots from above, where I generated samples
 
 [![Polya Urn Model, Alpha = 50](http://dl.dropbox.com/u/10506/blog/dirichlet-process/polya_alpha_50.png)](http://dl.dropbox.com/u/10506/blog/dirichlet-process/polya_alpha_50.png)
 
-Each run of the Polya Urn Model produces a slighly different distribution, though each is "centered" in some fashion around the standard Gaussian I used as base. In other words, the Polya Urn Model gives us a **distribution over distributions** -- and so we finally get to the Dirichlet Process.
+Each run of the Polya Urn Model produces a slighly different distribution, though each is "centered" in some fashion around the standard Gaussian I used as base. In other words, the Polya Urn Model gives us a **distribution over distributions** (we get a distribution of ball colors, and this distribution of colors changes each time) -- and so we finally get to the Dirichlet Process.
 
 Formally, given a base distribution $G_0$ and a dispersion parameter $\alpha$, a sample from the Dirichlet Process $DP(G_0, \alpha)$ is a distribution $G \sim DP(G_0, \alpha)$. This sample $G$ can be thought of as a distribution of colors in a single simulation of the Polya Urn Model; sampling from $G$ gives us the balls in the urn.
 
@@ -291,43 +284,45 @@ In the **Chinese Restaurant Process**:
 
 * We generate table assignments $g_1, \ldots, g_n \sim CRP(\alpha)$ according to a Chinese Restaurant Process. ($g_i$ is the table assigned to datapoint $i$.)
 * We generate table parameters $\phi_1, \ldots, \phi_n \sim G_0$ according to the base distribution $G_0$, where $\phi_k$ is the parameter for the kth distinct group.
-* Given table assignments and table parameters, we generate each datapoint $p_i | g_i, \phi_{g_i} \sim F(\phi_{g_i})$ from a distribution $F$ with the specified table parameters. (For example, $F$ could be a Gaussian, and $\phi_i$ could be a parameter vector specifying the mean and standard deviation).
+* Given table assignments and table parameters, we generate each datapoint $p_i \sim F(\phi_{g_i})$ from a distribution $F$ with the specified table parameters. (For example, $F$ could be a Gaussian, and $\phi_i$ could be a parameter vector specifying the mean and standard deviation).
 
 In the **Polya Urn Model**:
 
 * We generate colors $\phi_1, \ldots, \phi_n \sim Polya(G_0, \alpha)$ according to a Polya Urn Model. ($\phi_i$ is the color of the ith ball.)
-* Given ball colors, we generate each datapoint $p_i | \phi_i \sim F(\phi_i)$.
+* Given ball colors, we generate each datapoint $p_i \sim F(\phi_i)$.
 
 In the **Stick-Breaking Process**:
 
 * We generate group probabilities (stick lengths) $w_1, \ldots, w_{\infty} \sim Stick(\alpha)$ according to a Stick-Breaking process.
 * We generate group parameters $\phi_1, \ldots, \phi_{\infty} \sim G_0$ from $G_0$, where $\phi_k$ is the parameter for the kth distinct group.
 * We generate group assignments $g_1, \ldots, g_n \sim Multinomial(w_1, \ldots, w_{\infty})$ for each datapoint.
-* Given group assignments and group parameters, we generate each datapoint $p_i | g_i, \phi_{g_i} \sim F(\phi_{g_i})$.
+* Given group assignments and group parameters, we generate each datapoint $p_i \sim F(\phi_{g_i})$.
 
 In the **Dirichlet Process**:
 
 * We generate a distribution $G \sim DP(G_0, \alpha)$ from a Dirichlet Process with base distribution $G_0$ and dispersion parameter $\alpha$.
 * We generate group-level parameters $x_i \sim G$ from $G$, where $x_i$ is the group parameter for the ith datapoint. (Note: this is not the same as $\phi_i$. $x_i$ is the parameter associated to the group that the ith datapoint belongs to, whereas $\phi_k$ is the parameter of the kth distinct group.)
-* Given group-level parameters $x_i$, we generate each datapoint $p_i | x_i \sim F(x_i)$.
+* Given group-level parameters $x_i$, we generate each datapoint $p_i \sim F(x_i)$.
 
 Also, remember that each model naturally allows the number of clusters to grow as more points come in.
 
 # Inference in the Dirichlet Process Mixture
 
-So far, we've described a generative model that allows us to calculate the probability of any particular set of group assignments to data points, but we haven't described how to actually learn a good set of group assignments.
+So we've described a generative model that allows us to calculate the probability of any particular set of group assignments to data points, but we haven't described how to actually learn a good set of group assignments.
 
-How can we do this? Very roughly, the **Gibbs sampling** approach works as follows:
+Let's briefly do this now. Very roughly, the **Gibbs sampling** approach works as follows:
 
 * Take the set of data points, and randomly initialize group assignments.
 * Pick a point. Fix the group assignments of all the other points, and assign the chosen point a new group (which can be either an existing cluster or a new cluster) with a CRP-ish probability (as described in the models above) that depends on the group assignments and values of all the other points.
-* We will eventually converge to a good set of group assignments, so repeat the previous step until happy.
+* We will eventually converge on a good set of group assignments, so repeat the previous step until happy.
 
-# Fast Food Application: Clustering McDonald's
+For more details, [this paper](http://www.cs.toronto.edu/~radford/ftp/mixmc.pdf) provides a good description.
 
-Finally, let's show an application of the Dirichlet Process Mixture. Unfortunately, I didn't have a data set of people's food habits offhand, so instead I took [this list](nutrition.mcdonalds.com/nutritionexchange/nutritionfacts.pdf) of McDonald's foods and nutrition facts.
+# Fast Food Application: Clustering the McDonald's Menu
 
-After normalizing each food item to have an equal number of calories, and representing each item as a vector of (total fat, cholesterol, sodium, dietary fiber, sugars, protein, vitamin A, vitamin C, calcium, iron, calories from fat, satured fat, trans fat, carbohydrates), I ran [scikit-learn](http://scikit-learn.sourceforge.net/dev/index.html)'s [Dirichlet Process Gaussian Mixture Model](http://scikit-learn.sourceforge.net/dev/modules/mixture.html) to cluster McDonald's menu based on its nutritional value.
+Finally, let's show an application of the Dirichlet Process Mixture. Unfortunately, I didn't have a data set of people's food habits offhand, so instead I took [this list](http://nutrition.mcdonalds.com/nutritionexchange/nutritionfacts.pdf) of McDonald's foods and nutrition facts.
+
+After normalizing each item to have an equal number of calories, and representing each item as a vector of **(total fat, cholesterol, sodium, dietary fiber, sugars, protein, vitamin A, vitamin C, calcium, iron, calories from fat, satured fat, trans fat, carbohydrates)**, I ran [scikit-learn](http://scikit-learn.sourceforge.net/dev/index.html)'s [Dirichlet Process Gaussian Mixture Model](http://scikit-learn.sourceforge.net/dev/modules/mixture.html) to cluster McDonald's menu based on nutritional value.
 
 First, how does the number of clusters inferred by the Dirichlet Process mixture vary as we feed in more (randomly ordered) points?
 
@@ -339,11 +334,11 @@ How many clusters does the mixture model infer from the entire dataset? Running 
 
 [![Number of clusters](http://dl.dropbox.com/u/10506/blog/dirichlet-process/num_mcdonalds_clusters_small.png)](http://dl.dropbox.com/u/10506/blog/dirichlet-process/num_mcdonalds_clusters.png)
 
-Let's also dive into one of the clusterings.
+Let's dive into one of these clusterings.
 
 **Cluster 1 (Desserts)**
 
-Looking at a sample of foods from the first cluster discovered in one of the runs, we find a lot of desserts and dessert-y drinks:
+Looking at a sample of foods from the first cluster, we find a lot of desserts and dessert-y drinks:
 
 * Caramel Mocha
 * Frappe Caramel
@@ -357,11 +352,11 @@ Looking at a sample of foods from the first cluster discovered in one of the run
 * Kiddie Cone
 * Strawberry Sundae
 
-We can also [z-scale](http://en.wikipedia.org/wiki/Standard_score) each nutrition dimension to have zero mean and standard deviation 1, and look at the nutritional profile of some foods from this cluster:
+We can also look at the nutritional profile of some foods from this cluster (after [z-scaling](http://en.wikipedia.org/wiki/Standard_score) each nutrition dimension to have mean 0 and standard deviation 1):
 
 [![Cluster 1](http://dl.dropbox.com/u/10506/blog/dirichlet-process/cluster1.png)](http://dl.dropbox.com/u/10506/blog/dirichlet-process/cluster1.png)
 
-We can see that these foods tend to be high in trans fat and low in vitamins, protein, fiber, and sodium.
+We see that foods in this cluster tend to be high in trans fat and low in vitamins, protein, fiber, and sodium.
 
 **Cluster 2 (Sauces)**
 
@@ -377,7 +372,7 @@ And looking at the nutritional profile of points in this cluster, we see that it
 
 **Cluster 3 (Burgers, Crispy Foods, High-Cholesterol)**
 
-The third cluster is high in fat and sodium, and low in carbs and sugar:
+The third cluster is very burgery:
 
 * Hamburger
 * Cheeseburger
@@ -390,6 +385,8 @@ The third cluster is high in fat and sodium, and low in carbs and sugar:
 * Sausage McMuffin
 * Sausage McGriddles
 
+It's also high in fat and sodium, and low in carbs and sugar
+
 [![Cluster 3](http://dl.dropbox.com/u/10506/blog/dirichlet-process/cluster3.png)](http://dl.dropbox.com/u/10506/blog/dirichlet-process/cluster3.png)
 
 **Cluster 4 (Creamy Sauces)**
@@ -401,13 +398,13 @@ Interestingly, even though we already found a cluster of sauces above, we discov
 * Coffee Cream
 * Iced Coffee with Sugar Free Vanilla Syrup
 
-Nutritionally, it looks like the difference is that these sauces are higher in calories from fat, and much lower in sodium:
+Nutritionally, these sauces are higher in calories from fat, and much lower in sodium:
 
 [![Cluster 4](http://dl.dropbox.com/u/10506/blog/dirichlet-process/cluster4.png)](http://dl.dropbox.com/u/10506/blog/dirichlet-process/cluster4.png)
 
 **Cluster 5 (Salads)**
 
-Here's a salad cluster. A lot of salads also appeared in the third cluster (along with hamburgers and McMuffins), but those salads all contained crispy chicken as well. These salads are either crisp-free or have their chicken grilled instead:
+Here's a salad cluster. A lot of salads also appeared in the third cluster (along with hamburgers and McMuffins), but that's because those salads also all contained crispy chicken. The salads in this cluster are either crisp-free or have their chicken grilled instead:
 
 * Premium Southwest Salad with Grilled Chicken
 * Premium Caesar Salad with Grilled Chicken
@@ -427,7 +424,7 @@ Again, we find another cluster of sauces:
 * Barbeque Sauce
 * Chipotle Barbeque Sauce
 
-These are still high in sodium, but much lower in fat:
+These are still high in sodium, but much lower in fat compared to the other sauce clusters:
 
 [![Cluster 6](http://dl.dropbox.com/u/10506/blog/dirichlet-process/cluster6.png)](http://dl.dropbox.com/u/10506/blog/dirichlet-process/cluster6.png)
 
@@ -471,26 +468,36 @@ Here's a cluster of high-cholesterol breakfast foods:
 
 [![Cluster 9](http://dl.dropbox.com/u/10506/blog/dirichlet-process/cluster9.png)](http://dl.dropbox.com/u/10506/blog/dirichlet-process/cluster9.png)
 
-**Cluster 10 (Apples)**
+**Cluster 10 (Coffee Drinks)**
 
-Here's a cluster of apples:
-
-* Apple Dippers with Low Fat Caramel Dip
-* Apple Slices
-
-Vitamin C, check:
-
-[![Cluster 10](http://dl.dropbox.com/u/10506/blog/dirichlet-process/cluster10.png)](http://dl.dropbox.com/u/10506/blog/dirichlet-process/cluster10.png)
-
-**Cluster 11 (Coffee Drinks)**
-
-And finally, we find a group of coffee drinks:
+We find a group of coffee drinks next:
 
 * Nonfat Cappuccino
 * Nonfat Latte
 * Nonfat Latte with Sugar Free Vanilla Syrup
 * Iced Nonfat Latte
 
-These are much higher in calcium and protein, and much lower in sugar, than the other drink cluster from above:
+These are much higher in calcium and protein, and lower in sugar, than the other drink cluster above:
 
 [![Cluster 11](http://dl.dropbox.com/u/10506/blog/dirichlet-process/cluster11.png)](http://dl.dropbox.com/u/10506/blog/dirichlet-process/cluster11.png)
+
+**Cluster 11 (Apples)**
+
+And finally, here's a cluster of apples:
+
+* Apple Dippers with Low Fat Caramel Dip
+* Apple Slices
+
+Vitamin C, check.
+
+[![Cluster 10](http://dl.dropbox.com/u/10506/blog/dirichlet-process/cluster10.png)](http://dl.dropbox.com/u/10506/blog/dirichlet-process/cluster10.png)
+
+# The End
+
+I'll end with a couple notes:
+
+* Kevin Knight has a [hilarious introduction](http://www.isi.edu/natural-language/people/bayes-with-tears.pdf) to Bayesian inference that describes some applications of nonparametric Bayesian techniques to computational linguistics (though I don't think he ever quite says "nonparametric Bayes" directly).
+* The Chinese Restaurant Process, the Polya Urn Model, and the Stick-Breaking Process are all *sequential* models for generating groups: to figure out table parameters in the CRP, for example, you wait for customer 1 to come in, then customer 2, then customer 3, and so on. The equivalent Dirichlet Process, on the other hand, is a *parallelizable* model for generating groups: just sample $G \sim DP(G_0, alpha)$, and then all your group parameters can be independently generated by sampling from $G$ at once. This is actually an instance of a more general phenomenon known as [de Finetti's theorem](http://en.wikipedia.org/wiki/De_Finetti's_theorem).
+* In the Chinese Restaurant Process, each customer sits at a single table. The [Indian Buffet Process] is an extension that allows customers to sample food from multiple tables (i.e., belong to multiple clusters).
+
+And that's it, folks.
