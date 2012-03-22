@@ -1,3 +1,11 @@
+'''
+Code to calculate clusters using a Dirichlet Process
+Gaussian mixture model. 
+
+Requires scikit-learn:
+  http://scikit-learn.org/stable/
+'''
+
 import numpy
 from sklearn import mixture
 

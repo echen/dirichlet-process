@@ -1,3 +1,5 @@
+# Some of the plots used in the blog post.
+
 ##########
 # POLYA URN MODEL
 ##########
