@@ -1,3 +1,6 @@
+library(ggplot2)
+library(reshape)
+
 # Some of the plots used in the blog post.
 
 ##########
