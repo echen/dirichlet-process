@@ -1,7 +1,16 @@
 # Generate table assignments for `num_customers` customers, according to
 # a Chinese Restaurant Process with dispersion parameter `alpha`.
 #
-# returns an array of integer table assignments
+# Returns an array of integer table assignments.
+#
+# Examples
+#
+#   chinese_restaurant_process(num_customers = 5, alpha = 1)
+#     => [1, 2, 3, 4, 3]
+#
+#   chinese_restaurant_process(num_customers = 10, alpha = 3)
+#     => [1, 2, 1, 1, 3, 1, 2, 3, 4, 5]
+#
 def chinese_restaurant_process(num_customers, alpha)
   return [] if num_customers <= 0
 

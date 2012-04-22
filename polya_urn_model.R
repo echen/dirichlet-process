@@ -1,8 +1,14 @@
 # Return a vector of `num_balls` ball colors according to a Polya Urn Model
 # with dispersion `alpha`, sampling from a specified base color distribution.
+#
+# Examples
+#
+#   polya_urn_model(function() rnorm(1), 5, 1)
+#     => c(-0.2210029, -0.3013638, 0.8149611, 1.6879720, -0.7803525)
+#
 polya_urn_model = function(base_color_distribution, num_balls, alpha) {
   balls = c()
-  
+
   for (i in 1:num_balls) {
     if (runif(1) < alpha / (alpha + length(balls))) {
       # Add a new ball color.
@@ -15,7 +21,7 @@ polya_urn_model = function(base_color_distribution, num_balls, alpha) {
       balls = c(balls, ball)
     }
   }
-  
+
   balls
 }
 

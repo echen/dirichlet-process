@@ -2,7 +2,13 @@
 # with a specified base color distribution and dispersion parameter
 # `alpha`.
 #
-# returns an array of ball colors
+# Returns an array of ball colors.
+#
+# Examples
+#
+#   polya_urn_model(lambda { rand }, num_balls = 10, alpha = 1)
+#     => [0.55, 0.55, 0.55, 0.55, 0.12, 0.12, 0.46, 0.46, 0.55, 0.55]
+#
 def polya_urn_model(base_color_distribution, num_balls, alpha)
   return [] if num_balls <= 0
 

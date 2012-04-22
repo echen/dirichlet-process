@@ -3,9 +3,9 @@ library(reshape)
 
 # Some of the plots used in the blog post.
 
-##########
+#################
 # POLYA URN MODEL
-##########
+#################
 
 polya_urn_model_plots = function(num_balls, alpha) {
   # Lazy man's repetition...
@@ -27,9 +27,9 @@ polya_urn_model_plots = function(num_balls, alpha) {
 
 polya_urn_model_plots(10, 1)
 
-##########
+########################
 # STICK-BREAKING PROCESS
-##########
+########################
 
 stick_breaking_process_plots = function(num_weights, alpha) {
   x1 = stick_breaking_process(num_weights, alpha)
@@ -50,9 +50,9 @@ stick_breaking_process_plots = function(num_weights, alpha) {
 
 stick_breaking_process_plots(10, 5)
 
-##########
+##############
 # ALL CLUSTERS
-##########
+##############
 
 x = read.table("mcdonalds-data-with-clusters.tsv", header = T, sep = " ", comment.char = "", quote = "")
 
