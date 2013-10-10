@@ -16,7 +16,7 @@ Luckily for us, this is precisely the purview of **nonparametric Bayes**.*
 
 # A Generative Story
 
-Let's describe a generative model for finding clusters in any set of data. We assume an infinite set of latent groups, where each group is described by some set of parameters. For example, each group could be a Gaussian with a specified mean $\mu_i$ and standard deviation $\sigma_i$, and these group parameters themselves are assumed to come from some base distribution $G_0$. Data is then generated in the following manner:
+Let's describe a generative model for finding clusters in any set of data. We assume an infinite set of latent groups, where each group is described by some set of parameters. For example, each group could be a Gaussian with a specified mean `μ_i` and standard deviation `σ_i`, and these group parameters themselves are assumed to come from some base distribution `G_0`. Data is then generated in the following manner:
 
 * Select a cluster.
 * Sample from that cluster to generate a new point.
@@ -42,19 +42,19 @@ One way to assign friends to groups is to use a **Chinese Restaurant Process**. 
 
 * Initially the restaurant is empty.
 * The first person to enter (Alice) sits down at a table (selects a group). She then orders food for the table (i.e., she selects parameters for the group); everyone else who joins the table will then be limited to eating from the food she ordered.
-* The second person to enter (Bob) sits down at a table. Which table does he sit at? With probability $\alpha / (1 + \alpha)$ he sits down at a new table (i.e., selects a new group) and orders food for the table; with probability $1 / (1 + \alpha)$ he sits with Alice and eats from the food she's already ordered (i.e., he's in the same group as Alice).
+* The second person to enter (Bob) sits down at a table. Which table does he sit at? With probability `α / (1 + α)` he sits down at a new table (i.e., selects a new group) and orders food for the table; with probability `1 / (1 + α)` he sits with Alice and eats from the food she's already ordered (i.e., he's in the same group as Alice).
 * ...
-* The (n+1)-st person sits down at a new table with probability $\alpha / (n + \alpha)$, and at table k with probability $n_k / (n + \alpha)$, where $n_k$ is the number of people currently sitting at table k.
+* The (n+1)-st person sits down at a new table with probability `α / (n + α)`, and at table k with probability `n_k / (n + α)`, where `n_k` is the number of people currently sitting at table k.
 
 Note a couple things:
 
 * The more people (data points) there are at a table (cluster), the more likely it is that people (new data points) will join it. In other words, our groups satisfy a **rich get richer** property.
 * There's always a small probability that someone joins an entirely new table (i.e., a new group is formed).
-* The probability of a new group depends on $\alpha$. So we can think of $\alpha$ as a **dispersion parameter** that affects the dispersion of our datapoints. The lower alpha is, the more tightly clustered our data points; the higher it is, the more clusters we have in any finite set of points.
+* The probability of a new group depends on `α`. So we can think of `α` as a **dispersion parameter** that affects the dispersion of our datapoints. The lower alpha is, the more tightly clustered our data points; the higher it is, the more clusters we have in any finite set of points.
 
 (Also notice the resemblance between table selection probabilities and a Dirichlet distribution...)
 
-Just to summarize, given n data points, the Chinese Restaurant Process specifies a distribution over partitions (table assignments) of these points. We can also generate parameters for each partition/table from a base distribution $G_0$ (for example, each table could represent a Gaussian whose mean and standard deviation are sampled from $G_0$), though to be clear, this is not part of the CRP itself.
+Just to summarize, given n data points, the Chinese Restaurant Process specifies a distribution over partitions (table assignments) of these points. We can also generate parameters for each partition/table from a base distribution `G_0` (for example, each table could represent a Gaussian whose mean and standard deviation are sampled from `G_0`), though to be clear, this is not part of the CRP itself.
 
 ### Code
 
@@ -62,7 +62,7 @@ Since code makes everything better, here's some Ruby to simulate a CRP:
 
 ``` ruby
 # Generate table assignments for `num_customers` customers, according to
-# a Chinese Restaurant Process with dispersion parameter `alpha`.
+# a Chinese Restaurant Process with dispersion parameter `α`.
 #
 # returns an array of integer table assignments
 def chinese_restaurant_process(num_customers, alpha)
@@ -109,13 +109,13 @@ And here's some sample output:
 1, 2, 3, 4, 5, 6, 2, 7, 2, 1
 ```
 
-Notice that as we increase $\alpha$, so too does the number of distinct tables increase.
+Notice that as we increase `α`, so too does the number of distinct tables increase.
 
 ## Polya Urn Model
 
 Another method for assigning friends to groups is to follow the **Polya Urn Model**. This is basically the same model as the Chinese Restaurant Process, just with a different metaphor.
 
-* We start with an urn containing $\alpha G_0(x)$ balls of "color" $x$, for each possible value of $x$. ($G_0$ is our base distribution, and $G_0(x)$ is the probability of sampling $x$ from $G_0$). Note that these are possibly fractional balls.
+* We start with an urn containing `α G_0(x)` balls of "color" `x`, for each possible value of `x`. (`G_0` is our base distribution, and `G_0(x)` is the probability of sampling `x` from `G_0`). Note that these are possibly fractional balls.
 * At each time step, draw a ball from the urn, note its color, and then drop both the original ball plus a new ball of the same color back into the urn.
 
 Note the connection between this process and the CRP: balls correspond to people (i.e., data points), colors correspond to table assignments (i.e., clusters), alpha is again a dispersion parameter (put differently, a prior), colors satisfy a rich-get-richer property (since colors with many balls are more likely to get drawn), and so on. (Again, there's also a connection between this urn model and [the urn model for the (finite) Dirichlet distribution](http://en.wikipedia.org/wiki/Dirichlet_distribution#P.C3.B3lya.27s_urn)...)
@@ -129,7 +129,7 @@ Again, here's some code for simulating a Polya Urn Model:
 ``` ruby
 # Draw `num_balls` colored balls according to a Polya Urn Model
 # with a specified base color distribution and dispersion parameter
-# `alpha`.
+# `α`.
 #
 # returns an array of ball colors
 def polya_urn_model(base_color_distribution, num_balls, alpha)
@@ -169,7 +169,7 @@ Here's the same code for a Polya Urn Model, but in R:
 
 ``` r
 # Return a vector of `num_balls` ball colors according to a Polya Urn Model
-# with dispersion `alpha`, sampling from a specified base color distribution.
+# with dispersion `α`, sampling from a specified base color distribution.
 polya_urn_model = function(base_color_distribution, num_balls, alpha) {
   balls = c()
   
@@ -204,7 +204,7 @@ Notice that as alpha increases (i.e., we sample more new ball colors from our ba
 
 And here are some sample plots of points generated by the urn, for varying values of alpha:
 
-* Each color in the urn is sampled from a uniform distribution over [0,10]x[0,10] (i.e., a [0, 10] square).
+* Each color in the urn is sampled from a uniform distribution over \[0,10\] x \[0,10\] (i.e., a [0, 10] square).
 * Each group is a Gaussian with standard deviation 0.1 and mean equal to its associated color, and these Gaussian groups generate points.
 
 [![Alpha 0.1](http://dl.dropbox.com/u/10506/blog/dirichlet-process/alpha-0.1.png)](http://dl.dropbox.com/u/10506/blog/dirichlet-process/alpha-0.1.png)
@@ -221,18 +221,18 @@ Notice that the points clump together in fewer clusters for low values of alpha,
 
 ## Stick-Breaking Process
 
-Imagine running either the Chinese Restaurant Process or the Polya Urn Model without stop. For each group $i$, this gives a proportion $w_i$ of points that fall into group $i$.
+Imagine running either the Chinese Restaurant Process or the Polya Urn Model without stop. For each group `i`, this gives a proportion `w_i` of points that fall into group `i`.
 
 So instead of running the CRP or Polya Urn model to figure out these proportions, can we simply generate them directly?
 
 This is exactly what the Stick-Breaking Process does:
 
 * Start with a stick of length one.
-* Generate a random variable $\beta_1 \sim Beta(1, \alpha)$. By the definition of the [Beta distribution](http://en.wikipedia.org/wiki/Beta_distribution), this will be a real number between 0 and 1, with expected value $1 / (1 + \alpha)$. Break off the stick at $\beta_1$; $w_1$ is then the length of the stick on the left.
-* Now take the stick to the right, and generate $\beta_2 \sim Beta(1, \alpha)$. Break off the stick $\beta_2$ into the stick. Again, $w_2$ is the length of the stick to the left, i.e., $w_2 = (1 - \beta_1) \beta_2$.
+* Generate a random variable `β_1 ~ Beta(1, α)`. By the definition of the [Beta distribution](http://en.wikipedia.org/wiki/Beta_distribution), this will be a real number between 0 and 1, with expected value `1 / (1 + α)`. Break off the stick at `β_1`; `w_1` is then the length of the stick on the left.
+* Now take the stick to the right, and generate `β_2 ~ Beta(1, α)`. Break off the stick `β_2` into the stick. Again, `w_2` is the length of the stick to the left, i.e., `w_2 = (1 - \beta_1) \beta_2`.
 * And so on.
 
-Thus, the Stick-Breaking process is simply the CRP or Polya Urn Model from a different point of view. For example, assigning customers to table 1 according to the Chinese Restaurant Process is equivalent to assigning customers to table 1 with probability $w_1$.
+Thus, the Stick-Breaking process is simply the CRP or Polya Urn Model from a different point of view. For example, assigning customers to table 1 according to the Chinese Restaurant Process is equivalent to assigning customers to table 1 with probability `w_1`.
 
 ### Code
 
@@ -240,12 +240,12 @@ Here's some R code for simulating a Stick-Breaking process:
 
 ``` r
 # Return a vector of weights drawn from a stick-breaking process
-# with dispersion `alpha`.
+# with dispersion `α`.
 #
 # Recall that the kth weight is
 #   \beta_k = (1 - \beta_1) * (1 - \beta_2) * ... * (1 - \beta_{k-1}) * beta_k
-# where each $\beta_i$ is drawn from a Beta distribution
-#   \beta_i ~ Beta(1, \alpha)
+# where each `beta_i` is drawn from a Beta distribution
+#   \beta_i ~ Beta(1, α)
 stick_breaking_process = function(num_weights, alpha) {
   betas = rbeta(num_weights, 1, alpha)
   remaining_stick_lengths = c(1, cumprod(1 - betas))[1:num_weights]
@@ -266,7 +266,7 @@ Notice that for low values of alpha, the stick weights are concentrated on the f
 
 ## Dirichlet Process
 
-Suppose we run a Polya Urn Model several times, where we sample colors from a base distribution $G_0$. Each run produces a distribution of colors in the urn (say, 5% blue balls, 3% red balls, 2% pink balls, etc.), and the distribution will be different each time (for example, 5% blue balls in run 1, but 1% blue balls in run 2).
+Suppose we run a Polya Urn Model several times, where we sample colors from a base distribution `G_0`. Each run produces a distribution of colors in the urn (say, 5% blue balls, 3% red balls, 2% pink balls, etc.), and the distribution will be different each time (for example, 5% blue balls in run 1, but 1% blue balls in run 2).
 
 For example, let's look again at the plots from above, where I generated samples from a Polya Urn Model with the standard unit normal as the base distribution:
 
@@ -280,44 +280,44 @@ For example, let's look again at the plots from above, where I generated samples
 
 Each run of the Polya Urn Model produces a slighly different distribution, though each is "centered" in some fashion around the standard Gaussian I used as base. In other words, the Polya Urn Model gives us a **distribution over distributions** (we get a distribution of ball colors, and this distribution of colors changes each time) -- and so we finally get to the Dirichlet Process.
 
-Formally, given a base distribution $G_0$ and a dispersion parameter $\alpha$, a sample from the Dirichlet Process $DP(G_0, \alpha)$ is a distribution $G \sim DP(G_0, \alpha)$. This sample $G$ can be thought of as a distribution of colors in a single simulation of the Polya Urn Model; sampling from $G$ gives us the balls in the urn.
+Formally, given a base distribution `G_0` and a dispersion parameter `α`, a sample from the Dirichlet Process `DP(G_0, α)` is a distribution `G ~ DP(G_0, α)`. This sample `G` can be thought of as a distribution of colors in a single simulation of the Polya Urn Model; sampling from `G` gives us the balls in the urn.
 
 So here's the connection between the Chinese Restaurant Process, the Polya Urn Model, the Stick-Breaking Process, and the Dirichlet Process:
 
-* **Dirichlet Process**: Suppose we want samples $x_i \sim G$, where $G$ is a distribution sampled from the Dirichlet Process $G \sim DP(G_0, \alpha)$.
-* **Polya Urn Model**: One way to generate these values $x_i$ would be to take a Polya Urn Model with color distribution $G_0$ and dispersion $\alpha$. ($x_i$ would be the color of the ith ball in the urn.)
-* **Chinese Restaurant Process**: Another way to generate $x_i$ would be to first assign tables to customers according to a Chinese Restaurant Process with dispersion $\alpha$. Every customer at the nth table would then be given the same value (color) sampled from $G_0$. ($x_i$ would be the value given to the ith customer; $x_i$ can also be thought of as the food at table $i$, or as the parameters of table $i$.)
-* **Stick-Breaking Process**: Finally, we could generate weights $w_k$ according to a Stick-Breaking Process with dispersion $\alpha$. Next, we would give each weight $w_k$ a value (or color) $v_k$ sampled from $G_0$. Finally, we would assign $x_i$ to value (color) $v_k$ with probability $w_k$.
+* **Dirichlet Process**: Suppose we want samples `x_i ~ G`, where `G` is a distribution sampled from the Dirichlet Process `G ~ DP(G_0, α)`.
+* **Polya Urn Model**: One way to generate these values `x_i` would be to take a Polya Urn Model with color distribution `G_0` and dispersion `α`. (`x_i` would be the color of the ith ball in the urn.)
+* **Chinese Restaurant Process**: Another way to generate `x_i` would be to first assign tables to customers according to a Chinese Restaurant Process with dispersion `α`. Every customer at the nth table would then be given the same value (color) sampled from `G_0`. (`x_i` would be the value given to the ith customer; `x_i` can also be thought of as the food at table `i`, or as the parameters of table `i`.)
+* **Stick-Breaking Process**: Finally, we could generate weights `w_k` according to a Stick-Breaking Process with dispersion `α`. Next, we would give each weight `w_k` a value (or color) `v_k` sampled from `G_0`. Finally, we would assign `x_i` to value (color) `v_k` with probability `w_k`.
 
 # Recap
 
 Let's summarize what we've discussed so far.
 
-We have a bunch of data points $p_i$ that we want to cluster, and we've described four essentially equivalent generative models that allow us to describe how each cluster and point could have arisen.
+We have a bunch of data points `p_i` that we want to cluster, and we've described four essentially equivalent generative models that allow us to describe how each cluster and point could have arisen.
 
 In the **Chinese Restaurant Process**:
 
-* We generate table assignments $g_1, \ldots, g_n \sim CRP(\alpha)$ according to a Chinese Restaurant Process. ($g_i$ is the table assigned to datapoint $i$.)
-* We generate table parameters $\phi_1, \ldots, \phi_n \sim G_0$ according to the base distribution $G_0$, where $\phi_k$ is the parameter for the kth distinct group.
-* Given table assignments and table parameters, we generate each datapoint $p_i \sim F(\phi_{g_i})$ from a distribution $F$ with the specified table parameters. (For example, $F$ could be a Gaussian, and $\phi_i$ could be a parameter vector specifying the mean and standard deviation).
+* We generate table assignments `g_1, ..., g_n ~ CRP(α)` according to a Chinese Restaurant Process. (`g_i` is the table assigned to datapoint `i`.)
+* We generate table parameters `φ_1, ..., φ_n ~ G_0` according to the base distribution `G_0`, where `φ_k` is the parameter for the kth distinct group.
+* Given table assignments and table parameters, we generate each datapoint `p_i ~ F(φ_{g_i})` from a distribution `F` with the specified table parameters. (For example, `F` could be a Gaussian, and `φ_i` could be a parameter vector specifying the mean and standard deviation).
 
 In the **Polya Urn Model**:
 
-* We generate colors $\phi_1, \ldots, \phi_n \sim Polya(G_0, \alpha)$ according to a Polya Urn Model. ($\phi_i$ is the color of the ith ball.)
-* Given ball colors, we generate each datapoint $p_i \sim F(\phi_i)$.
+* We generate colors `φ_1, ..., φ_n ~ Polya(G_0, α)` according to a Polya Urn Model. (`φ_i` is the color of the ith ball.)
+* Given ball colors, we generate each datapoint `p_i ~ F(φ_i)`.
 
 In the **Stick-Breaking Process**:
 
-* We generate group probabilities (stick lengths) $w_1, \ldots, w_{\infty} \sim Stick(\alpha)$ according to a Stick-Breaking process.
-* We generate group parameters $\phi_1, \ldots, \phi_{\infty} \sim G_0$ from $G_0$, where $\phi_k$ is the parameter for the kth distinct group.
-* We generate group assignments $g_1, \ldots, g_n \sim Multinomial(w_1, \ldots, w_{\infty})$ for each datapoint.
-* Given group assignments and group parameters, we generate each datapoint $p_i \sim F(\phi_{g_i})$.
+* We generate group probabilities (stick lengths) `w_1, ..., w_{∞} ~ Stick(α)` according to a Stick-Breaking process.
+* We generate group parameters `φ_1, ..., φ_{∞} ~ G_0` from `G_0`, where `φ_k` is the parameter for the kth distinct group.
+* We generate group assignments `g_1, ..., g_n ~ Multinomial(w_1, ..., w_{∞})` for each datapoint.
+* Given group assignments and group parameters, we generate each datapoint `p_i ~ F(φ_{g_i})`.
 
 In the **Dirichlet Process**:
 
-* We generate a distribution $G \sim DP(G_0, \alpha)$ from a Dirichlet Process with base distribution $G_0$ and dispersion parameter $\alpha$.
-* We generate group-level parameters $x_i \sim G$ from $G$, where $x_i$ is the group parameter for the ith datapoint. (Note: this is not the same as $\phi_i$. $x_i$ is the parameter associated to the group that the ith datapoint belongs to, whereas $\phi_k$ is the parameter of the kth distinct group.)
-* Given group-level parameters $x_i$, we generate each datapoint $p_i \sim F(x_i)$.
+* We generate a distribution `G ~ DP(G_0, α)` from a Dirichlet Process with base distribution `G_0` and dispersion parameter `α`.
+* We generate group-level parameters `x_i ~ G` from `G`, where `x_i` is the group parameter for the ith datapoint. (Note: this is not the same as `φ_i`. `x_i` is the parameter associated to the group that the ith datapoint belongs to, whereas `φ_k` is the parameter of the kth distinct group.)
+* Given group-level parameters `x_i`, we generate each datapoint `p_i ~ F(x_i)`.
 
 Also, remember that each model naturally allows the number of clusters to grow as more points come in.
 
@@ -517,6 +517,6 @@ I'll end with a couple notes:
 
 * Kevin Knight has a [hilarious introduction](http://www.isi.edu/natural-language/people/bayes-with-tears.pdf) to Bayesian inference that describes some applications of nonparametric Bayesian techniques to computational linguistics (though I don't think he ever quite says "nonparametric Bayes" directly).
 * In the Chinese Restaurant Process, each customer sits at a single table. The [Indian Buffet Process](http://en.wikipedia.org/wiki/Chinese_restaurant_process#The_Indian_buffet_process) is an extension that allows customers to sample food from multiple tables (i.e., belong to multiple clusters).
-* The Chinese Restaurant Process, the Polya Urn Model, and the Stick-Breaking Process are all *sequential* models for generating groups: to figure out table parameters in the CRP, for example, you wait for customer 1 to come in, then customer 2, then customer 3, and so on. The equivalent Dirichlet Process, on the other hand, is a *parallelizable* model for generating groups: just sample $G \sim DP(G_0, alpha)$, and then all your group parameters can be independently generated by sampling from $G$ at once. This duality is an instance of a more general phenomenon known as [de Finetti's theorem](http://en.wikipedia.org/wiki/De_Finetti's_theorem).
+* The Chinese Restaurant Process, the Polya Urn Model, and the Stick-Breaking Process are all *sequential* models for generating groups: to figure out table parameters in the CRP, for example, you wait for customer 1 to come in, then customer 2, then customer 3, and so on. The equivalent Dirichlet Process, on the other hand, is a *parallelizable* model for generating groups: just sample `G ~ DP(G_0, α)`, and then all your group parameters can be independently generated by sampling from `G` at once. This duality is an instance of a more general phenomenon known as [de Finetti's theorem](http://en.wikipedia.org/wiki/De_Finetti's_theorem).
 
 And that's it.
