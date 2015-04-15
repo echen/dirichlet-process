@@ -298,7 +298,7 @@ We have a bunch of data points `p_i` that we want to cluster, and we've describe
 In the **Chinese Restaurant Process**:
 
 * We generate table assignments `g_1, ..., g_n ~ CRP(α)` according to a Chinese Restaurant Process. (`g_i` is the table assigned to datapoint `i`.)
-* We generate table parameters `φ_1, ..., φ_n ~ G_0` according to the base distribution `G_0`, where `φ_k` is the parameter for the kth distinct group.
+* We generate table parameters `φ_1, ..., φ_m ~ G_0` according to the base distribution `G_0`, where `φ_k` is the parameter for the kth distinct group.
 * Given table assignments and table parameters, we generate each datapoint `p_i ~ F(φ_{g_i})` from a distribution `F` with the specified table parameters. (For example, `F` could be a Gaussian, and `φ_i` could be a parameter vector specifying the mean and standard deviation).
 
 In the **Polya Urn Model**:
